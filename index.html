@@ -294,6 +294,31 @@
             border-radius: 10px;
         }
 
+        /* Indicador de observação no dia */
+        .day-cell.has-obs::before {
+            content: '\f044'; /* ícone lápis FontAwesome */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 0.55rem;
+            color: #ec7000;
+            background: #ffffff;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .day-cell.selected.has-obs::before {
+            color: #003366;
+            background: #ec7000;
+        }
+
         .footer-info {
             text-align: center;
             font-size: 0.75rem;
@@ -382,6 +407,254 @@
             line-height: 1.4;
         }
 
+        /* ===== MENU DE AÇÕES DO DIA ===== */
+        .day-action-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 20, 35, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            padding: 20px;
+        }
+
+        .day-action-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .day-action-card {
+            background: #ffffff;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 340px;
+            padding: 22px 20px 18px 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.92);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .day-action-overlay.show .day-action-card {
+            transform: scale(1);
+        }
+
+        .day-action-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .day-action-header .day-badge {
+            display: inline-block;
+            background: #003366;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 5px 14px;
+            border-radius: 30px;
+            margin-bottom: 8px;
+        }
+
+        .day-action-header h3 {
+            font-size: 1.05rem;
+            color: #1e2f40;
+            font-weight: 700;
+        }
+
+        .day-action-header p {
+            font-size: 0.78rem;
+            color: #8a9bb0;
+            margin-top: 4px;
+        }
+
+        .day-action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 13px 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            width: 100%;
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        .action-btn.primary {
+            background: #003366;
+            color: #ffffff;
+        }
+
+        .action-btn.primary:hover {
+            background: #004b8f;
+        }
+
+        .action-btn.danger {
+            background: #fdecec;
+            color: #b02020;
+            border: 1px solid #f5c6c6;
+        }
+
+        .action-btn.danger:hover {
+            background: #fadada;
+        }
+
+        .action-btn.cancel {
+            background: transparent;
+            color: #73869b;
+            font-weight: 500;
+            padding: 8px;
+        }
+
+        .action-btn.cancel:hover {
+            color: #1e2f40;
+        }
+
+        /* Observação exibida no card */
+        .existing-obs {
+            background: #f5f8fc;
+            border-left: 3px solid #ec7000;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #4a5b6b;
+            margin-bottom: 4px;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .existing-obs strong {
+            display: block;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8a9bb0;
+            margin-bottom: 3px;
+        }
+
+        /* ===== MODAL DE OBSERVAÇÃO ===== */
+        .obs-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 20, 35, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 210;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            padding: 20px;
+        }
+
+        .obs-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .obs-card {
+            background: #ffffff;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 360px;
+            padding: 24px 20px 20px 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.92);
+            transition: transform 0.2s;
+        }
+
+        .obs-overlay.show .obs-card {
+            transform: scale(1);
+        }
+
+        .obs-card h3 {
+            font-size: 1.05rem;
+            color: #1e2f40;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .obs-card .obs-sub {
+            font-size: 0.78rem;
+            color: #8a9bb0;
+            margin-bottom: 14px;
+        }
+
+        .obs-card textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1.5px solid #dce2ec;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            color: #1e2f40;
+            background: #f9fbfe;
+            transition: border-color 0.2s;
+        }
+
+        .obs-card textarea:focus {
+            outline: none;
+            border-color: #003366;
+            background: #ffffff;
+        }
+
+        .obs-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .obs-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .obs-actions .save {
+            background: #003366;
+            color: #ffffff;
+        }
+
+        .obs-actions .save:hover {
+            background: #004b8f;
+        }
+
+        .obs-actions .cancel {
+            background: #f1f4fa;
+            color: #4a5b6b;
+            border: 1px solid #dce2ec;
+        }
+
+        .obs-actions .cancel:hover {
+            background: #e4e9f3;
+        }
+
         /* ===== TOAST ===== */
         .toast {
             position: fixed;
@@ -396,7 +669,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             opacity: 0;
             transition: all 0.3s ease;
-            z-index: 100;
+            z-index: 300;
             pointer-events: none;
             display: flex;
             align-items: center;
@@ -410,23 +683,11 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .toast.success {
-            background: #0a5c3a;
-        }
+        .toast.success { background: #0a5c3a; }
+        .toast.warning { background: #b35a00; }
+        .toast.error { background: #a02020; }
 
-        .toast.warning {
-            background: #b35a00;
-        }
-
-        .toast.error {
-            background: #a02020;
-        }
-
-        .toast i {
-            color: #ec7000;
-            font-size: 1rem;
-        }
-
+        .toast i { color: #ec7000; font-size: 1rem; }
         .toast.success i { color: #7bdca0; }
         .toast.warning i { color: #ffcc80; }
         .toast.error i { color: #ff9b9b; }
@@ -439,7 +700,8 @@
             .day-cell { font-size: 0.95rem; border-radius: 12px; }
             .calendar-section { padding: 14px 8px 16px 8px; }
             .nav-btn { width: 36px; height: 36px; font-size: 1rem; }
-            .toast { font-size: 0.78rem; padding: 10px 16px; }
+            .toast { font-size: 0.78rem; padding: 10px 16px; white-space: normal; text-align: center; }
+            .day-cell.has-obs::before { width: 10px; height: 10px; font-size: 0.45rem; top: 1px; right: 2px; }
         }
 
         @media (max-width: 340px) {
@@ -447,7 +709,7 @@
             .weekdays div { font-size: 0.65rem; }
         }
 
-        button:focus-visible, .day-cell:focus-visible {
+        button:focus-visible, .day-cell:focus-visible, textarea:focus-visible {
             outline: 2px solid #ec7000;
             outline-offset: 2px;
         }
@@ -508,7 +770,7 @@
             <div class="days-grid" id="daysGrid"></div>
 
             <div class="footer-info">
-                <i class="fas fa-circle"></i> Clique em um dia para adicionar R$ 50,00
+                <i class="fas fa-circle"></i> Clique num dia para adicionar R$ 50,00 • Clique num dia marcado para ver opções
             </div>
         </div>
 
@@ -519,6 +781,42 @@
             </button>
             <div class="download-hint">
                 O arquivo será baixado automaticamente na pasta de downloads do seu dispositivo.
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU DE AÇÕES DO DIA -->
+    <div class="day-action-overlay" id="dayActionOverlay">
+        <div class="day-action-card">
+            <div class="day-action-header">
+                <div class="day-badge" id="actionDayBadge">--/--/----</div>
+                <h3 id="actionDayTitle">Dia selecionado</h3>
+                <p>O que deseja fazer?</p>
+            </div>
+            <div id="existingObsContainer"></div>
+            <div class="day-action-buttons">
+                <button class="action-btn primary" id="btnAddObs">
+                    <i class="fas fa-pen"></i> Adicionar observação
+                </button>
+                <button class="action-btn danger" id="btnDeleteDay">
+                    <i class="fas fa-trash-alt"></i> Excluir dia
+                </button>
+                <button class="action-btn cancel" id="btnCancelAction">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE OBSERVAÇÃO -->
+    <div class="obs-overlay" id="obsOverlay">
+        <div class="obs-card">
+            <h3>Observação do dia</h3>
+            <p class="obs-sub" id="obsDateLabel">--/--/----</p>
+            <textarea id="obsTextarea" placeholder="Digite uma observação para este dia..." maxlength="500"></textarea>
+            <div class="obs-actions">
+                <button class="cancel" id="btnCancelObs">Cancelar</button>
+                <button class="save" id="btnSaveObs">Salvar</button>
             </div>
         </div>
     </div>
@@ -534,7 +832,12 @@
             // ========== ESTADO ==========
             let currentDate = new Date();
             let selectedDays = new Set();
+            let dayObservations = {}; // { "YYYY-MM-DD": "texto" }
             let saldo = 0.00;
+
+            // Estado do menu de ações
+            let actionDayKey = null;
+            let observationDayKey = null;
 
             // ========== DOM ==========
             const monthYearDisplay = document.getElementById('monthYearDisplay');
@@ -546,6 +849,22 @@
             const btnStatement = document.getElementById('btnStatement');
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
+
+            // Menu de ações
+            const dayActionOverlay = document.getElementById('dayActionOverlay');
+            const actionDayBadge = document.getElementById('actionDayBadge');
+            const actionDayTitle = document.getElementById('actionDayTitle');
+            const existingObsContainer = document.getElementById('existingObsContainer');
+            const btnAddObs = document.getElementById('btnAddObs');
+            const btnDeleteDay = document.getElementById('btnDeleteDay');
+            const btnCancelAction = document.getElementById('btnCancelAction');
+
+            // Modal de observação
+            const obsOverlay = document.getElementById('obsOverlay');
+            const obsDateLabel = document.getElementById('obsDateLabel');
+            const obsTextarea = document.getElementById('obsTextarea');
+            const btnCancelObs = document.getElementById('btnCancelObs');
+            const btnSaveObs = document.getElementById('btnSaveObs');
 
             // ========== UTILITÁRIOS ==========
             function formatCurrency(value) {
@@ -587,6 +906,69 @@
                 }, 4000);
             }
 
+            // ========== MENU DE AÇÕES ==========
+            function openDayActionMenu(dayKey) {
+                actionDayKey = dayKey;
+                const dateFormatted = formatDateFromKey(dayKey);
+                const [y, m, d] = dayKey.split('-');
+                actionDayBadge.textContent = `${d}/${m}/${y}`;
+
+                const obs = dayObservations[dayKey];
+                if (obs && obs.trim() !== '') {
+                    actionDayTitle.textContent = 'Dia marcado com observação';
+                    existingObsContainer.innerHTML = `<div class="existing-obs"><strong>Observação atual:</strong>${escapeHtml(obs)}</div>`;
+                } else {
+                    actionDayTitle.textContent = 'Dia marcado';
+                    existingObsContainer.innerHTML = '';
+                }
+
+                dayActionOverlay.classList.add('show');
+            }
+
+            function closeDayActionMenu() {
+                dayActionOverlay.classList.remove('show');
+                actionDayKey = null;
+            }
+
+            // ========== MODAL DE OBSERVAÇÃO ==========
+            function openObsModal(dayKey) {
+                observationDayKey = dayKey;
+                const [y, m, d] = dayKey.split('-');
+                obsDateLabel.textContent = `${d}/${m}/${y}`;
+                obsTextarea.value = dayObservations[dayKey] || '';
+                obsOverlay.classList.add('show');
+                setTimeout(() => obsTextarea.focus(), 100);
+            }
+
+            function closeObsModal() {
+                obsOverlay.classList.remove('show');
+                observationDayKey = null;
+            }
+
+            function saveObservation() {
+                if (!observationDayKey) return;
+                const text = obsTextarea.value.trim();
+
+                if (text === '') {
+                    // Se apagar a observação, remove a chave
+                    delete dayObservations[observationDayKey];
+                    showToast('Observação removida.', 'info');
+                } else {
+                    dayObservations[observationDayKey] = text;
+                    showToast('Observação salva com sucesso!', 'success');
+                }
+
+                closeObsModal();
+                renderCalendar();
+            }
+
+            // Escapa HTML para evitar injeção no card
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
             // ========== RENDERIZAÇÃO ==========
             function renderCalendar() {
                 const year = currentDate.getFullYear();
@@ -616,24 +998,28 @@
                     dayCell.textContent = day;
 
                     const dayKey = getDayKey(year, month, day);
+                    const isSelected = selectedDays.has(dayKey);
+                    const hasObs = !!dayObservations[dayKey] && dayObservations[dayKey].trim() !== '';
 
-                    if (selectedDays.has(dayKey)) {
+                    if (isSelected) {
                         dayCell.classList.add('selected');
+                    }
+                    if (hasObs) {
+                        dayCell.classList.add('has-obs');
                     }
 
                     dayCell.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const key = getDayKey(year, month, day);
 
-                        if (selectedDays.has(key)) {
-                            selectedDays.delete(key);
-                            dayCell.classList.remove('selected');
+                        if (isSelected) {
+                            // Já selecionado → abre menu de ações
+                            openDayActionMenu(dayKey);
                         } else {
-                            selectedDays.add(key);
+                            // Não selecionado → marca o dia
+                            selectedDays.add(dayKey);
                             dayCell.classList.add('selected');
+                            updateSaldoDisplay();
                         }
-
-                        updateSaldoDisplay();
                     });
 
                     daysGrid.appendChild(dayCell);
@@ -669,13 +1055,11 @@
                     return;
                 }
 
-                // Efeito de carregamento no botão
                 btnStatement.disabled = true;
                 btnStatement.classList.add('loading');
                 const originalHTML = btnStatement.innerHTML;
                 btnStatement.innerHTML = '<i class="fas fa-spinner"></i> Gerando PDF...';
 
-                // Delay mínimo para o usuário perceber o feedback visual
                 setTimeout(() => {
                     try {
                         const { jsPDF } = window.jspdf;
@@ -806,6 +1190,21 @@
 
                             totalLancamentos += 50;
                             cursorY += rowH;
+
+                            // Observação do dia (se houver)
+                            const obs = dayObservations[key];
+                            if (obs && obs.trim() !== '') {
+                                if (cursorY > pageH - 30) {
+                                    doc.addPage();
+                                    cursorY = 20;
+                                }
+                                doc.setFontSize(7.5);
+                                doc.setTextColor(140, 155, 170);
+                                const splitText = doc.splitTextToSize('Obs.: ' + obs, pageW - margin * 2 - 12);
+                                doc.text(splitText, margin + 8, cursorY + 4);
+                                cursorY += splitText.length * 4 + 1;
+                                doc.setFontSize(9);
+                            }
                         });
 
                         if (cursorY > pageH - 40) {
@@ -847,16 +1246,13 @@
                             doc.text(`Página ${i} de ${pageCount}`, pageW - margin, pageH - 10, { align: 'right' });
                         }
 
-                        // ===== DOWNLOAD DO PDF =====
+                        // ===== DOWNLOAD =====
                         const fileName = `extrato-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.pdf`;
 
-                        // Método 1: doc.save() — dispara download automaticamente
-                        // Método 2 (fallback): Blob + link — usado em navegadores que bloqueiam save()
                         try {
                             doc.save(fileName);
                             showToast('Extrato PDF baixado com sucesso!', 'success');
                         } catch (saveErr) {
-                            // Fallback: gera Blob e força download via âncora
                             const pdfBlob = doc.output('blob');
                             const blobUrl = URL.createObjectURL(pdfBlob);
                             const link = document.createElement('a');
@@ -865,13 +1261,10 @@
                             link.style.display = 'none';
                             document.body.appendChild(link);
                             link.click();
-
-                            // Limpa após breve delay para liberar memória
                             setTimeout(() => {
                                 document.body.removeChild(link);
                                 URL.revokeObjectURL(blobUrl);
                             }, 1000);
-
                             showToast('Extrato PDF baixado com sucesso!', 'success');
                         }
 
@@ -879,7 +1272,6 @@
                         console.error('Erro ao gerar PDF:', err);
                         showToast('Erro ao gerar o PDF. Tente novamente.', 'error');
                     } finally {
-                        // Restaura o botão
                         btnStatement.disabled = false;
                         btnStatement.classList.remove('loading');
                         btnStatement.innerHTML = originalHTML;
@@ -887,11 +1279,59 @@
                 }, 400);
             }
 
+            // ========== EVENTOS DOS MODAIS ==========
+            function bindModalEvents() {
+                // Menu de ações
+                btnCancelAction.addEventListener('click', closeDayActionMenu);
+                dayActionOverlay.addEventListener('click', (e) => {
+                    if (e.target === dayActionOverlay) closeDayActionMenu();
+                });
+
+                btnAddObs.addEventListener('click', () => {
+                    const key = actionDayKey;
+                    closeDayActionMenu();
+                    if (key) openObsModal(key);
+                });
+
+                btnDeleteDay.addEventListener('click', () => {
+                    if (!actionDayKey) return;
+                    const key = actionDayKey;
+                    selectedDays.delete(key);
+                    delete dayObservations[key];
+                    closeDayActionMenu();
+                    renderCalendar();
+                    updateSaldoDisplay();
+                    showToast('Dia excluído.', 'info');
+                });
+
+                // Modal de observação
+                btnCancelObs.addEventListener('click', closeObsModal);
+                obsOverlay.addEventListener('click', (e) => {
+                    if (e.target === obsOverlay) closeObsModal();
+                });
+                btnSaveObs.addEventListener('click', saveObservation);
+                obsTextarea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        saveObservation();
+                    }
+                });
+
+                // ESC fecha modais
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (obsOverlay.classList.contains('show')) closeObsModal();
+                        else if (dayActionOverlay.classList.contains('show')) closeDayActionMenu();
+                    }
+                });
+            }
+
             // ========== INICIALIZAÇÃO ==========
             function init() {
                 currentDate = new Date();
                 renderCalendar();
                 updateSaldoDisplay();
+                bindModalEvents();
 
                 prevMonthBtn.addEventListener('click', goToPreviousMonth);
                 nextMonthBtn.addEventListener('click', goToNextMonth);
