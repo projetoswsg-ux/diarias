@@ -909,7 +909,6 @@
             // ========== MENU DE AÇÕES ==========
             function openDayActionMenu(dayKey) {
                 actionDayKey = dayKey;
-                const dateFormatted = formatDateFromKey(dayKey);
                 const [y, m, d] = dayKey.split('-');
                 actionDayBadge.textContent = `${d}/${m}/${y}`;
 
@@ -950,7 +949,6 @@
                 const text = obsTextarea.value.trim();
 
                 if (text === '') {
-                    // Se apagar a observação, remove a chave
                     delete dayObservations[observationDayKey];
                     showToast('Observação removida.', 'info');
                 } else {
@@ -998,20 +996,21 @@
                     dayCell.textContent = day;
 
                     const dayKey = getDayKey(year, month, day);
-                    const isSelected = selectedDays.has(dayKey);
                     const hasObs = !!dayObservations[dayKey] && dayObservations[dayKey].trim() !== '';
 
-                    if (isSelected) {
+                    // Estado inicial (apenas visual na renderização)
+                    if (selectedDays.has(dayKey)) {
                         dayCell.classList.add('selected');
                     }
                     if (hasObs) {
                         dayCell.classList.add('has-obs');
                     }
 
+                    // ✅ CORREÇÃO: consulta o Set NO MOMENTO DO CLIQUE
                     dayCell.addEventListener('click', (e) => {
                         e.stopPropagation();
 
-                        if (isSelected) {
+                        if (selectedDays.has(dayKey)) {
                             // Já selecionado → abre menu de ações
                             openDayActionMenu(dayKey);
                         } else {
