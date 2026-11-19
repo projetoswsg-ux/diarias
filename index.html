@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Banco Itaú • Calendário de Rendimentos</title>
+    <title>Controle de diaria</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -742,9 +742,9 @@
         <nav class="navbar">
             <div class="navbar-left">
                 <div class="logo-area">
-                    <span class="logo-icon">itaú</span>
+                    <span class="logo-icon">Diária</span>
                     <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">|</span>
-                    <span style="font-size: 0.85rem;">contas</span>
+                    <span style="font-size: 0.85rem;">controle</span>
                 </div>
             </div>
             <div class="navbar-right">
@@ -757,14 +757,14 @@
         <!-- SALDO -->
         <div class="balance-panel">
             <div class="balance-label">
-                <i class="fas fa-wallet"></i> Saldo disponível
+                <i class="fas fa-wallet"></i> Saldo
             </div>
             <div class="balance-value">
                 <span class="balance-currency">R$</span>
                 <span id="saldoDisplay">0,00</span>
             </div>
             <div class="balance-sub">
-                <span><i class="fas fa-calendar-check"></i> Rendimento por dia: R$ 50,00</span>
+                <span><i class="fas fa-calendar-check"></i> Valor da diária: R$ 50,00</span>
                 <span id="selectedDaysCount">0 dias</span>
             </div>
         </div>
@@ -791,17 +791,17 @@
             <div class="days-grid" id="daysGrid"></div>
 
             <div class="footer-info">
-                <i class="fas fa-circle"></i> Clique num dia para adicionar R$ 50,00 • Clique num dia marcado para ver opções
+                <i class="fas fa-circle"></i> Clique para adicionar diárias
             </div>
         </div>
 
         <!-- BOTÃO DE EXTRATO -->
         <div class="statement-wrapper">
             <button class="btn-statement" id="btnStatement">
-                <i class="fas fa-file-pdf"></i> Gerar e baixar extrato em PDF
+                <i class="fas fa-file-pdf"></i> Gerar extrato
             </button>
             <div class="download-hint">
-                O arquivo será baixado automaticamente na pasta de downloads do seu dispositivo.
+                O arquivo será baixado na pasta de downloads do dispositivo.
             </div>
         </div>
     </div>
@@ -832,7 +832,7 @@
     <!-- MODAL DE OBSERVAÇÃO -->
     <div class="obs-overlay" id="obsOverlay">
         <div class="obs-card">
-            <h3>Observação do dia</h3>
+            <h3>Observação da diária</h3>
             <p class="obs-sub" id="obsDateLabel">--/--/----</p>
             <textarea id="obsTextarea" placeholder="Digite uma observação para este dia..." maxlength="500"></textarea>
             <div class="obs-actions">
@@ -1094,18 +1094,18 @@
                 doc.setTextColor(255, 255, 255);
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(16);
-                doc.text('Extrato de Rendimentos', margin + 26, 15);
+                doc.text('Extrato de faturamento', margin + 26, 15);
 
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
-                doc.text('Calendário de Rendimentos Diários', margin + 26, 21);
+                doc.text('Calendário de faturamento Diários', margin + 26, 21);
 
                 const now = new Date();
                 const emissionDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                 doc.setFontSize(8);
                 doc.setTextColor(220, 230, 240);
                 doc.text(`Emitido em: ${emissionDate}`, pageW - margin, 15, { align: 'right' });
-                doc.text('Banco Itaú S.A. • Agência 0001', pageW - margin, 21, { align: 'right' });
+                doc.text('Controle de diária • Selma Santana', pageW - margin, 21, { align: 'right' });
 
                 cursorY = 45;
 
@@ -1118,7 +1118,7 @@
                 doc.setTextColor(80, 100, 120);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
-                doc.text('SALDO TOTAL DISPONÍVEL', margin + 8, cursorY + 8);
+                doc.text('SALDO TOTAL', margin + 8, cursorY + 8);
 
                 doc.setTextColor(0, 51, 102);
                 doc.setFont('helvetica', 'bold');
@@ -1128,7 +1128,7 @@
                 doc.setTextColor(80, 100, 120);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
-                doc.text('DIAS DE RENDIMENTO', pageW - margin - 8, cursorY + 8, { align: 'right' });
+                doc.text('DIAS DE FATURAMENTO', pageW - margin - 8, cursorY + 8, { align: 'right' });
 
                 doc.setTextColor(0, 51, 102);
                 doc.setFont('helvetica', 'bold');
@@ -1234,8 +1234,8 @@
                 doc.setTextColor(140, 155, 170);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(7.5);
-                doc.text('Este extrato é um documento informativo gerado automaticamente pelo aplicativo.', margin, footerY);
-                doc.text('Banco Itaú S.A. • CNPJ 60.701.190/0001-04 • Ouvidoria 0800 570 0011', margin, footerY + 4);
+                doc.text('Este extrato é um documento de faturamento informativo.', margin, footerY);
+                doc.text('Controle de diárias • Selma Santana • Dúvidas: hordabs@gmail.com', margin, footerY + 4);
                 doc.text(`Documento gerado em ${emissionDate}`, margin, footerY + 8);
 
                 const pageCount = doc.internal.getNumberOfPages();
@@ -1254,7 +1254,7 @@
             // ========== DOWNLOAD DO PDF ==========
             function generateStatementPDF() {
                 if (selectedDays.size === 0) {
-                    showToast('Marque pelo menos um dia para gerar o extrato.', 'warning');
+                    showToast('Marque pelo menos um dia.', 'warning');
                     return;
                 }
 
@@ -1269,7 +1269,7 @@
 
                         try {
                             doc.save(fileName);
-                            showToast('Extrato PDF baixado com sucesso!', 'success');
+                            showToast('Extrato baixado com sucesso!', 'success');
                         } catch (saveErr) {
                             const pdfBlob = doc.output('blob');
                             const blobUrl = URL.createObjectURL(pdfBlob);
@@ -1283,7 +1283,7 @@
                                 document.body.removeChild(link);
                                 URL.revokeObjectURL(blobUrl);
                             }, 1000);
-                            showToast('Extrato PDF baixado com sucesso!', 'success');
+                            showToast('Extrato baixado com sucesso!', 'success');
                         }
 
                     } catch (err) {
@@ -1319,12 +1319,12 @@
                     const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
                     // Monta o texto que acompanha o compartilhamento
-                    const shareText = `Extrato de Rendimentos • Banco Itaú\nSaldo total: ${formatBRL(saldo)}\nDias de rendimento: ${selectedDays.size}`;
+                    const shareText = `Extrato de Faturamentos • Selma Santana\nSaldo total: ${formatBRL(saldo)}\nDias de faturamento: ${selectedDays.size}`;
 
                     // Verifica se a Web Share API está disponível e suporta arquivos
                     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
-                            title: 'Extrato de Rendimentos - Itaú',
+                            title: 'Extrato de Faturamentos - Diária',
                             text: shareText,
                             files: [file]
                         });
@@ -1332,7 +1332,7 @@
                     } else if (navigator.share) {
                         // Fallback: compartilha só texto (navegadores sem suporte a arquivos)
                         await navigator.share({
-                            title: 'Extrato de Rendimentos - Itaú',
+                            title: 'Extrato de Faturamentos - Diária',
                             text: shareText + '\n\n(Abra o app em um navegador compatível para compartilhar o PDF.)'
                         });
                         showToast('Texto do extrato compartilhado. Para enviar o PDF, baixe-o pelo botão abaixo.', 'info');
