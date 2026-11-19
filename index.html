@@ -56,12 +56,6 @@
             gap: 14px;
         }
 
-        .menu-icon, .profile-icon {
-            font-size: 1.3rem;
-            cursor: default;
-            color: #ffffff;
-        }
-
         .logo-area {
             display: flex;
             align-items: center;
@@ -84,6 +78,35 @@
             display: flex;
             align-items: center;
             gap: 16px;
+        }
+
+        /* Botão de compartilhar na navbar */
+        .share-icon-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .share-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: scale(1.05);
+        }
+
+        .share-icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .share-icon-btn.loading i {
+            animation: spin 1s linear infinite;
         }
 
         /* ===== PAINEL DE SALDO ===== */
@@ -294,9 +317,8 @@
             border-radius: 10px;
         }
 
-        /* Indicador de observação no dia */
         .day-cell.has-obs::before {
-            content: '\f044'; /* ícone lápis FontAwesome */
+            content: '\f044';
             font-family: 'Font Awesome 6 Free';
             font-weight: 900;
             position: absolute;
@@ -529,7 +551,6 @@
             color: #1e2f40;
         }
 
-        /* Observação exibida no card */
         .existing-obs {
             background: #f5f8fc;
             border-left: 3px solid #ec7000;
@@ -720,7 +741,6 @@
         <!-- NAVBAR -->
         <nav class="navbar">
             <div class="navbar-left">
-                <i class="fas fa-bars menu-icon"></i>
                 <div class="logo-area">
                     <span class="logo-icon">itaú</span>
                     <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">|</span>
@@ -728,8 +748,9 @@
                 </div>
             </div>
             <div class="navbar-right">
-                <i class="fas fa-bell profile-icon"></i>
-                <i class="fas fa-user-circle profile-icon"></i>
+                <button class="share-icon-btn" id="btnShareNavbar" aria-label="Compartilhar extrato">
+                    <i class="fas fa-share-alt"></i>
+                </button>
             </div>
         </nav>
 
@@ -832,10 +853,9 @@
             // ========== ESTADO ==========
             let currentDate = new Date();
             let selectedDays = new Set();
-            let dayObservations = {}; // { "YYYY-MM-DD": "texto" }
+            let dayObservations = {};
             let saldo = 0.00;
 
-            // Estado do menu de ações
             let actionDayKey = null;
             let observationDayKey = null;
 
@@ -847,10 +867,10 @@
             const saldoDisplay = document.getElementById('saldoDisplay');
             const selectedDaysCount = document.getElementById('selectedDaysCount');
             const btnStatement = document.getElementById('btnStatement');
+            const btnShareNavbar = document.getElementById('btnShareNavbar');
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
 
-            // Menu de ações
             const dayActionOverlay = document.getElementById('dayActionOverlay');
             const actionDayBadge = document.getElementById('actionDayBadge');
             const actionDayTitle = document.getElementById('actionDayTitle');
@@ -859,7 +879,6 @@
             const btnDeleteDay = document.getElementById('btnDeleteDay');
             const btnCancelAction = document.getElementById('btnCancelAction');
 
-            // Modal de observação
             const obsOverlay = document.getElementById('obsOverlay');
             const obsDateLabel = document.getElementById('obsDateLabel');
             const obsTextarea = document.getElementById('obsTextarea');
@@ -960,7 +979,6 @@
                 renderCalendar();
             }
 
-            // Escapa HTML para evitar injeção no card
             function escapeHtml(text) {
                 const div = document.createElement('div');
                 div.textContent = text;
@@ -998,7 +1016,6 @@
                     const dayKey = getDayKey(year, month, day);
                     const hasObs = !!dayObservations[dayKey] && dayObservations[dayKey].trim() !== '';
 
-                    // Estado inicial (apenas visual na renderização)
                     if (selectedDays.has(dayKey)) {
                         dayCell.classList.add('selected');
                     }
@@ -1006,15 +1023,12 @@
                         dayCell.classList.add('has-obs');
                     }
 
-                    // ✅ CORREÇÃO: consulta o Set NO MOMENTO DO CLIQUE
                     dayCell.addEventListener('click', (e) => {
                         e.stopPropagation();
 
                         if (selectedDays.has(dayKey)) {
-                            // Já selecionado → abre menu de ações
                             openDayActionMenu(dayKey);
                         } else {
-                            // Não selecionado → marca o dia
                             selectedDays.add(dayKey);
                             dayCell.classList.add('selected');
                             updateSaldoDisplay();
@@ -1047,7 +1061,197 @@
                 renderCalendar();
             }
 
-            // ========== GERAÇÃO E DOWNLOAD DO PDF ==========
+            // ========== GERAÇÃO DO PDF (RETORNA O DOC) ==========
+            function buildStatementPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageW = doc.internal.pageSize.getWidth();
+                const pageH = doc.internal.pageSize.getHeight();
+                const margin = 18;
+                let cursorY = 20;
+
+                const sortedKeys = Array.from(selectedDays).sort();
+
+                // CABEÇALHO
+                doc.setFillColor(0, 51, 102);
+                doc.rect(0, 0, pageW, 32, 'F');
+
+                doc.setFillColor(236, 112, 0);
+                doc.rect(0, 32, pageW, 3, 'F');
+
+                doc.setFillColor(236, 112, 0);
+                doc.roundedRect(margin, 9, 20, 10, 2, 2, 'F');
+                doc.setTextColor(0, 51, 102);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.text('itaú', margin + 4.5, 16);
+
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(16);
+                doc.text('Extrato de Rendimentos', margin + 26, 15);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text('Calendário de Rendimentos Diários', margin + 26, 21);
+
+                const now = new Date();
+                const emissionDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                doc.setFontSize(8);
+                doc.setTextColor(220, 230, 240);
+                doc.text(`Emitido em: ${emissionDate}`, pageW - margin, 15, { align: 'right' });
+                doc.text('Banco Itaú S.A. • Agência 0001', pageW - margin, 21, { align: 'right' });
+
+                cursorY = 45;
+
+                // RESUMO
+                doc.setFillColor(245, 248, 252);
+                doc.setDrawColor(0, 51, 102);
+                doc.setLineWidth(0.4);
+                doc.roundedRect(margin, cursorY, pageW - margin * 2, 28, 3, 3, 'FD');
+
+                doc.setTextColor(80, 100, 120);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text('SALDO TOTAL DISPONÍVEL', margin + 8, cursorY + 8);
+
+                doc.setTextColor(0, 51, 102);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(22);
+                doc.text(formatBRL(saldo), margin + 8, cursorY + 20);
+
+                doc.setTextColor(80, 100, 120);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text('DIAS DE RENDIMENTO', pageW - margin - 8, cursorY + 8, { align: 'right' });
+
+                doc.setTextColor(0, 51, 102);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.text(`${selectedDays.size} ${selectedDays.size === 1 ? 'dia' : 'dias'}`, pageW - margin - 8, cursorY + 20, { align: 'right' });
+
+                cursorY += 38;
+
+                // TABELA
+                doc.setTextColor(0, 51, 102);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.text('Detalhamento dos lançamentos', margin, cursorY);
+                cursorY += 5;
+
+                doc.setFillColor(0, 51, 102);
+                doc.rect(margin, cursorY, pageW - margin * 2, 8, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.text('Data', margin + 4, cursorY + 5.5);
+                doc.text('Descrição', margin + 40, cursorY + 5.5);
+                doc.text('Valor (R$)', pageW - margin - 4, cursorY + 5.5, { align: 'right' });
+
+                cursorY += 8;
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+
+                let totalLancamentos = 0;
+
+                sortedKeys.forEach((key, index) => {
+                    if (cursorY > pageH - 40) {
+                        doc.addPage();
+                        cursorY = 20;
+                    }
+
+                    const rowH = 8;
+                    const isEven = index % 2 === 0;
+
+                    if (isEven) {
+                        doc.setFillColor(247, 250, 253);
+                        doc.rect(margin, cursorY, pageW - margin * 2, rowH, 'F');
+                    }
+
+                    doc.setDrawColor(225, 232, 240);
+                    doc.setLineWidth(0.2);
+                    doc.line(margin, cursorY + rowH, pageW - margin, cursorY + rowH);
+
+                    doc.setTextColor(40, 60, 80);
+                    doc.text(formatDateFromKey(key), margin + 4, cursorY + 5.5);
+
+                    doc.setTextColor(80, 100, 120);
+                    doc.text('Rendimento diário', margin + 40, cursorY + 5.5);
+
+                    doc.setTextColor(0, 102, 60);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('+ ' + formatBRL(50.00), pageW - margin - 4, cursorY + 5.5, { align: 'right' });
+                    doc.setFont('helvetica', 'normal');
+
+                    totalLancamentos += 50;
+                    cursorY += rowH;
+
+                    const obs = dayObservations[key];
+                    if (obs && obs.trim() !== '') {
+                        if (cursorY > pageH - 30) {
+                            doc.addPage();
+                            cursorY = 20;
+                        }
+                        doc.setFontSize(7.5);
+                        doc.setTextColor(140, 155, 170);
+                        const splitText = doc.splitTextToSize('Obs.: ' + obs, pageW - margin * 2 - 12);
+                        doc.text(splitText, margin + 8, cursorY + 4);
+                        cursorY += splitText.length * 4 + 1;
+                        doc.setFontSize(9);
+                    }
+                });
+
+                if (cursorY > pageH - 40) {
+                    doc.addPage();
+                    cursorY = 20;
+                }
+
+                cursorY += 2;
+                doc.setDrawColor(0, 51, 102);
+                doc.setLineWidth(0.5);
+                doc.line(margin, cursorY, pageW - margin, cursorY);
+                cursorY += 7;
+
+                doc.setTextColor(0, 51, 102);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.text('TOTAL', margin + 4, cursorY);
+                doc.text(formatBRL(totalLancamentos), pageW - margin - 4, cursorY, { align: 'right' });
+
+                // RODAPÉ
+                const footerY = pageH - 22;
+
+                doc.setDrawColor(220, 226, 234);
+                doc.setLineWidth(0.3);
+                doc.line(margin, footerY - 6, pageW - margin, footerY - 6);
+
+                doc.setTextColor(140, 155, 170);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.text('Este extrato é um documento informativo gerado automaticamente pelo aplicativo.', margin, footerY);
+                doc.text('Banco Itaú S.A. • CNPJ 60.701.190/0001-04 • Ouvidoria 0800 570 0011', margin, footerY + 4);
+                doc.text(`Documento gerado em ${emissionDate}`, margin, footerY + 8);
+
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setTextColor(140, 155, 170);
+                    doc.setFontSize(7);
+                    doc.text(`Página ${i} de ${pageCount}`, pageW - margin, pageH - 10, { align: 'right' });
+                }
+
+                const fileName = `extrato-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.pdf`;
+
+                return { doc, fileName };
+            }
+
+            // ========== DOWNLOAD DO PDF ==========
             function generateStatementPDF() {
                 if (selectedDays.size === 0) {
                     showToast('Marque pelo menos um dia para gerar o extrato.', 'warning');
@@ -1061,192 +1265,7 @@
 
                 setTimeout(() => {
                     try {
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF({
-                            orientation: 'portrait',
-                            unit: 'mm',
-                            format: 'a4'
-                        });
-
-                        const pageW = doc.internal.pageSize.getWidth();
-                        const pageH = doc.internal.pageSize.getHeight();
-                        const margin = 18;
-                        let cursorY = 20;
-
-                        const sortedKeys = Array.from(selectedDays).sort();
-
-                        // ===== CABEÇALHO =====
-                        doc.setFillColor(0, 51, 102);
-                        doc.rect(0, 0, pageW, 32, 'F');
-
-                        doc.setFillColor(236, 112, 0);
-                        doc.rect(0, 32, pageW, 3, 'F');
-
-                        doc.setFillColor(236, 112, 0);
-                        doc.roundedRect(margin, 9, 20, 10, 2, 2, 'F');
-                        doc.setTextColor(0, 51, 102);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(11);
-                        doc.text('itaú', margin + 4.5, 16);
-
-                        doc.setTextColor(255, 255, 255);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(16);
-                        doc.text('Extrato de Rendimentos', margin + 26, 15);
-
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-                        doc.text('Calendário de Rendimentos Diários', margin + 26, 21);
-
-                        const now = new Date();
-                        const emissionDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                        doc.setFontSize(8);
-                        doc.setTextColor(220, 230, 240);
-                        doc.text(`Emitido em: ${emissionDate}`, pageW - margin, 15, { align: 'right' });
-                        doc.text('Banco Itaú S.A. • Agência 0001', pageW - margin, 21, { align: 'right' });
-
-                        cursorY = 45;
-
-                        // ===== RESUMO DO SALDO =====
-                        doc.setFillColor(245, 248, 252);
-                        doc.setDrawColor(0, 51, 102);
-                        doc.setLineWidth(0.4);
-                        doc.roundedRect(margin, cursorY, pageW - margin * 2, 28, 3, 3, 'FD');
-
-                        doc.setTextColor(80, 100, 120);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-                        doc.text('SALDO TOTAL DISPONÍVEL', margin + 8, cursorY + 8);
-
-                        doc.setTextColor(0, 51, 102);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(22);
-                        doc.text(formatBRL(saldo), margin + 8, cursorY + 20);
-
-                        doc.setTextColor(80, 100, 120);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-                        doc.text('DIAS DE RENDIMENTO', pageW - margin - 8, cursorY + 8, { align: 'right' });
-
-                        doc.setTextColor(0, 51, 102);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(18);
-                        doc.text(`${selectedDays.size} ${selectedDays.size === 1 ? 'dia' : 'dias'}`, pageW - margin - 8, cursorY + 20, { align: 'right' });
-
-                        cursorY += 38;
-
-                        // ===== TABELA =====
-                        doc.setTextColor(0, 51, 102);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(11);
-                        doc.text('Detalhamento dos lançamentos', margin, cursorY);
-                        cursorY += 5;
-
-                        doc.setFillColor(0, 51, 102);
-                        doc.rect(margin, cursorY, pageW - margin * 2, 8, 'F');
-                        doc.setTextColor(255, 255, 255);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(9);
-                        doc.text('Data', margin + 4, cursorY + 5.5);
-                        doc.text('Descrição', margin + 40, cursorY + 5.5);
-                        doc.text('Valor (R$)', pageW - margin - 4, cursorY + 5.5, { align: 'right' });
-
-                        cursorY += 8;
-
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-
-                        let totalLancamentos = 0;
-
-                        sortedKeys.forEach((key, index) => {
-                            if (cursorY > pageH - 40) {
-                                doc.addPage();
-                                cursorY = 20;
-                            }
-
-                            const rowH = 8;
-                            const isEven = index % 2 === 0;
-
-                            if (isEven) {
-                                doc.setFillColor(247, 250, 253);
-                                doc.rect(margin, cursorY, pageW - margin * 2, rowH, 'F');
-                            }
-
-                            doc.setDrawColor(225, 232, 240);
-                            doc.setLineWidth(0.2);
-                            doc.line(margin, cursorY + rowH, pageW - margin, cursorY + rowH);
-
-                            doc.setTextColor(40, 60, 80);
-                            doc.text(formatDateFromKey(key), margin + 4, cursorY + 5.5);
-
-                            doc.setTextColor(80, 100, 120);
-                            doc.text('Rendimento diário', margin + 40, cursorY + 5.5);
-
-                            doc.setTextColor(0, 102, 60);
-                            doc.setFont('helvetica', 'bold');
-                            doc.text('+ ' + formatBRL(50.00), pageW - margin - 4, cursorY + 5.5, { align: 'right' });
-                            doc.setFont('helvetica', 'normal');
-
-                            totalLancamentos += 50;
-                            cursorY += rowH;
-
-                            // Observação do dia (se houver)
-                            const obs = dayObservations[key];
-                            if (obs && obs.trim() !== '') {
-                                if (cursorY > pageH - 30) {
-                                    doc.addPage();
-                                    cursorY = 20;
-                                }
-                                doc.setFontSize(7.5);
-                                doc.setTextColor(140, 155, 170);
-                                const splitText = doc.splitTextToSize('Obs.: ' + obs, pageW - margin * 2 - 12);
-                                doc.text(splitText, margin + 8, cursorY + 4);
-                                cursorY += splitText.length * 4 + 1;
-                                doc.setFontSize(9);
-                            }
-                        });
-
-                        if (cursorY > pageH - 40) {
-                            doc.addPage();
-                            cursorY = 20;
-                        }
-
-                        cursorY += 2;
-                        doc.setDrawColor(0, 51, 102);
-                        doc.setLineWidth(0.5);
-                        doc.line(margin, cursorY, pageW - margin, cursorY);
-                        cursorY += 7;
-
-                        doc.setTextColor(0, 51, 102);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(10);
-                        doc.text('TOTAL', margin + 4, cursorY);
-                        doc.text(formatBRL(totalLancamentos), pageW - margin - 4, cursorY, { align: 'right' });
-
-                        // ===== RODAPÉ =====
-                        const footerY = pageH - 22;
-
-                        doc.setDrawColor(220, 226, 234);
-                        doc.setLineWidth(0.3);
-                        doc.line(margin, footerY - 6, pageW - margin, footerY - 6);
-
-                        doc.setTextColor(140, 155, 170);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(7.5);
-                        doc.text('Este extrato é um documento informativo gerado automaticamente pelo aplicativo.', margin, footerY);
-                        doc.text('Banco Itaú S.A. • CNPJ 60.701.190/0001-04 • Ouvidoria 0800 570 0011', margin, footerY + 4);
-                        doc.text(`Documento gerado em ${emissionDate}`, margin, footerY + 8);
-
-                        const pageCount = doc.internal.getNumberOfPages();
-                        for (let i = 1; i <= pageCount; i++) {
-                            doc.setPage(i);
-                            doc.setTextColor(140, 155, 170);
-                            doc.setFontSize(7);
-                            doc.text(`Página ${i} de ${pageCount}`, pageW - margin, pageH - 10, { align: 'right' });
-                        }
-
-                        // ===== DOWNLOAD =====
-                        const fileName = `extrato-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.pdf`;
+                        const { doc, fileName } = buildStatementPDF();
 
                         try {
                             doc.save(fileName);
@@ -1278,9 +1297,78 @@
                 }, 400);
             }
 
+            // ========== COMPARTILHAR VIA WEB SHARE API ==========
+            async function shareStatement() {
+                if (selectedDays.size === 0) {
+                    showToast('Marque pelo menos um dia para compartilhar o extrato.', 'warning');
+                    return;
+                }
+
+                // Estado de loading no botão
+                btnShareNavbar.classList.add('loading');
+                btnShareNavbar.disabled = true;
+                const originalIcon = btnShareNavbar.innerHTML;
+                btnShareNavbar.innerHTML = '<i class="fas fa-spinner"></i>';
+
+                // Delay para feedback visual
+                await new Promise(r => setTimeout(r, 300));
+
+                try {
+                    const { doc, fileName } = buildStatementPDF();
+                    const pdfBlob = doc.output('blob');
+                    const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+                    // Monta o texto que acompanha o compartilhamento
+                    const shareText = `Extrato de Rendimentos • Banco Itaú\nSaldo total: ${formatBRL(saldo)}\nDias de rendimento: ${selectedDays.size}`;
+
+                    // Verifica se a Web Share API está disponível e suporta arquivos
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'Extrato de Rendimentos - Itaú',
+                            text: shareText,
+                            files: [file]
+                        });
+                        showToast('Extrato compartilhado!', 'success');
+                    } else if (navigator.share) {
+                        // Fallback: compartilha só texto (navegadores sem suporte a arquivos)
+                        await navigator.share({
+                            title: 'Extrato de Rendimentos - Itaú',
+                            text: shareText + '\n\n(Abra o app em um navegador compatível para compartilhar o PDF.)'
+                        });
+                        showToast('Texto do extrato compartilhado. Para enviar o PDF, baixe-o pelo botão abaixo.', 'info');
+                    } else {
+                        // Navegador sem Web Share API: baixa o PDF e orienta o usuário
+                        const blobUrl = URL.createObjectURL(pdfBlob);
+                        const link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = fileName;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(blobUrl);
+                        }, 1000);
+                        showToast('Navegador sem suporte a compartilhamento. PDF baixado — envie manualmente pelo WhatsApp.', 'info');
+                    }
+
+                } catch (err) {
+                    // Usuário cancelou o compartilhamento ou ocorreu erro
+                    if (err && err.name === 'AbortError') {
+                        // Cancelamento silencioso
+                    } else {
+                        console.error('Erro ao compartilhar:', err);
+                        showToast('Não foi possível compartilhar. Tente novamente.', 'error');
+                    }
+                } finally {
+                    btnShareNavbar.classList.remove('loading');
+                    btnShareNavbar.disabled = false;
+                    btnShareNavbar.innerHTML = originalIcon;
+                }
+            }
+
             // ========== EVENTOS DOS MODAIS ==========
             function bindModalEvents() {
-                // Menu de ações
                 btnCancelAction.addEventListener('click', closeDayActionMenu);
                 dayActionOverlay.addEventListener('click', (e) => {
                     if (e.target === dayActionOverlay) closeDayActionMenu();
@@ -1303,7 +1391,6 @@
                     showToast('Dia excluído.', 'info');
                 });
 
-                // Modal de observação
                 btnCancelObs.addEventListener('click', closeObsModal);
                 obsOverlay.addEventListener('click', (e) => {
                     if (e.target === obsOverlay) closeObsModal();
@@ -1316,7 +1403,6 @@
                     }
                 });
 
-                // ESC fecha modais
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         if (obsOverlay.classList.contains('show')) closeObsModal();
@@ -1335,6 +1421,7 @@
                 prevMonthBtn.addEventListener('click', goToPreviousMonth);
                 nextMonthBtn.addEventListener('click', goToNextMonth);
                 btnStatement.addEventListener('click', generateStatementPDF);
+                btnShareNavbar.addEventListener('click', shareStatement);
             }
 
             document.addEventListener('DOMContentLoaded', init);
